@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - MCP_WOOCOMMERCE_URL=http://mcp-woocommerce:8001/sse
+      - REDIS_URL=redis://redis:6379/0
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    depends_on:
+      - mcp-woocommerce
+      - redis
+    networks:
+      - urumi-net
+
+  mcp-woocommerce:
+    build:
+      context: ./mcp-servers/woocommerce
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - WOOCOMMERCE_STORE_URL=${WOOCOMMERCE_STORE_URL:-https://example-store.com}
+      - WOOCOMMERCE_CONSUMER_KEY=${WOOCOMMERCE_CONSUMER_KEY:-}
+      - WOOCOMMERCE_CONSUMER_SECRET=${WOOCOMMERCE_CONSUMER_SECRET:-}
+    networks:
+      - urumi-net
+
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - gateway
+    networks:
+      - urumi-net
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - urumi-net
+
+networks:
+  urumi-net:
+    driver: bridge

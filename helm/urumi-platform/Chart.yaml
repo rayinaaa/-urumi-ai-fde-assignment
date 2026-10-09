@@ -1,0 +1,9 @@
+apiVersion: v2
+name: urumi-platform
+description: Helm chart for deploying the Urumi AI Platform (Gateway, WooCommerce MCP Server, and Dashboard)
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+maintainers:
+  - name: Urumi AI Team
+    email: dev@urumi.ai

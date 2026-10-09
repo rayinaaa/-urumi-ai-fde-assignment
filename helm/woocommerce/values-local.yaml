@@ -1,0 +1,95 @@
+# Local Development Values for WooCommerce Chart
+# Suitable for Minikube, Docker Desktop K8s, Kind, or K3d.
+
+global:
+  environment: local
+
+secrets:
+  mysqlRootPassword: "root_dev_password"
+  mysqlDatabase: "wordpress"
+  mysqlUser: "wordpress"
+  mysqlPassword: "wp_dev_password"
+  wordpressAdminUser: "admin"
+  wordpressAdminPassword: "admin_dev_password"
+  wordpressAdminEmail: "admin@store.local"
+  woocommerceConsumerKey: "ck_dev_test_key"
+  woocommerceConsumerSecret: "cs_dev_test_secret"
+
+wordpress:
+  replicaCount: 1
+  image:
+    repository: wordpress
+    tag: "6.5-apache"
+    pullPolicy: IfNotPresent
+  
+  persistence:
+    enabled: true
+    storageClass: "standard"
+    accessMode: ReadWriteOnce
+    size: 2Gi
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 768Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+  livenessProbe:
+    httpGet:
+      path: /wp-login.php
+      port: 80
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 5
+
+  readinessProbe:
+    httpGet:
+      path: /wp-login.php
+      port: 80
+    initialDelaySeconds: 15
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+mysql:
+  enabled: true
+  persistence:
+    enabled: true
+    storageClass: "standard"
+    accessMode: ReadWriteOnce
+    size: 5Gi
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+  livenessProbe:
+    tcpSocket:
+      port: 3306
+    initialDelaySeconds: 20
+    periodSeconds: 10
+
+  readinessProbe:
+    tcpSocket:
+      port: 3306
+    initialDelaySeconds: 10
+    periodSeconds: 5
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "32m"
+  hosts:
+    - host: store.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []

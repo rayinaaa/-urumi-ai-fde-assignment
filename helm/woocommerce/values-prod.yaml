@@ -1,0 +1,106 @@
+# Production Values for WooCommerce Chart
+# Suitable for EKS, GKE, AKS, or Enterprise Bare-Metal K8s.
+
+global:
+  environment: production
+
+secrets:
+  # In production, either inject an existing Secret name or provide encrypted sealed secrets / external secrets
+  existingSecret: "urumi-store-production-secrets"
+  mysqlRootPassword: ""
+  mysqlDatabase: "wordpress_prod"
+  mysqlUser: "wp_prod_user"
+  mysqlPassword: ""
+  wordpressAdminUser: "urumi_admin"
+  wordpressAdminPassword: ""
+  wordpressAdminEmail: "admin@urumi.ai"
+  woocommerceConsumerKey: ""
+  woocommerceConsumerSecret: ""
+
+wordpress:
+  replicaCount: 1 # Scale with shared ReadWriteMany storage (e.g., EFS / NFS) if replicas > 1
+  image:
+    repository: wordpress
+    tag: "6.5-apache"
+    pullPolicy: IfNotPresent
+
+  persistence:
+    enabled: true
+    storageClass: "gp3"
+    accessMode: ReadWriteOnce
+    size: 50Gi
+
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+
+  livenessProbe:
+    httpGet:
+      path: /wp-login.php
+      port: 80
+    initialDelaySeconds: 90
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 6
+
+  readinessProbe:
+    httpGet:
+      path: /wp-login.php
+      port: 80
+    initialDelaySeconds: 45
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+mysql:
+  enabled: true # Set to false if using managed RDS / CloudSQL
+  persistence:
+    enabled: true
+    storageClass: "gp3"
+    accessMode: ReadWriteOnce
+    size: 100Gi
+
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+
+  livenessProbe:
+    tcpSocket:
+      port: 3306
+    initialDelaySeconds: 60
+    periodSeconds: 15
+
+  readinessProbe:
+    tcpSocket:
+      port: 3306
+    initialDelaySeconds: 30
+    periodSeconds: 10
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "128m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
+  hosts:
+    - host: store.urumi.ai
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: urumi-store-tls
+      hosts:
+        - store.urumi.ai

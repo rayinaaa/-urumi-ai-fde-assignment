@@ -1,0 +1,84 @@
+# Global configuration
+global:
+  environment: production
+  domain: urumi.example.com
+
+# FastAPI Gateway Configuration
+gateway:
+  replicaCount: 2
+  image:
+    repository: urumi/gateway
+    pullPolicy: IfNotPresent
+    tag: "latest"
+  service:
+    type: ClusterIP
+    port: 8000
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  env:
+    MCP_WOOCOMMERCE_URL: "http://urumi-platform-mcp-woocommerce:8001/sse"
+    REDIS_URL: "redis://urumi-platform-redis-master:6379/0"
+
+# WooCommerce MCP Server Configuration
+mcpWooCommerce:
+  replicaCount: 2
+  image:
+    repository: urumi/mcp-woocommerce
+    pullPolicy: IfNotPresent
+    tag: "latest"
+  service:
+    type: ClusterIP
+    port: 8001
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  config:
+    storeUrl: "https://store.example.com"
+
+# React Vite Dashboard Configuration
+dashboard:
+  replicaCount: 2
+  image:
+    repository: urumi/dashboard
+    pullPolicy: IfNotPresent
+    tag: "latest"
+  service:
+    type: ClusterIP
+    port: 80
+  resources:
+    limits:
+      cpu: 250m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+# Ingress Configuration
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: urumi.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: dashboard
+        - path: /api
+          pathType: Prefix
+          service: gateway
+  tls:
+    - secretName: urumi-platform-tls
+      hosts:
+        - urumi.example.com

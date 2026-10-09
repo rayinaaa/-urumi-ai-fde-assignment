@@ -1,0 +1,49 @@
+{{- if .Values.wordpress.autoSetup -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "woocommerce.fullname" . }}-setup
+  labels:
+    app.kubernetes.io/component: setup-job
+    {{- include "woocommerce.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    metadata:
+      name: {{ include "woocommerce.fullname" . }}-setup
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: wp-cli-setup
+          image: wordpress:cli-2.9-php8.2
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "[WP-CLI] Waiting for WordPress core files and database..."
+              sleep 20
+              wp core is-installed --path=/var/www/html || {
+                echo "[WP-CLI] Installing WordPress core..."
+                wp core install \
+                  --path=/var/www/html \
+                  --url="http://{{ (index .Values.ingress.hosts 0).host }}" \
+                  --title="Urumi AI WooCommerce Store" \
+                  --admin_user="{{ .Values.secrets.wordpressAdminUser }}" \
+                  --admin_password="{{ .Values.secrets.wordpressAdminPassword }}" \
+                  --admin_email="{{ .Values.secrets.wordpressAdminEmail }}" \
+                  --skip-email
+              }
+              echo "[WP-CLI] Activating WooCommerce plugin..."
+              wp plugin install woocommerce --activate --path=/var/www/html || true
+              wp rewrite structure '/%postname%/' --path=/var/www/html || true
+              echo "[WP-CLI] Store initialization complete."
+          volumeMounts:
+            - name: wp-storage
+              mountPath: /var/www/html
+      volumes:
+        - name: wp-storage
+          persistentVolumeClaim:
+            claimName: {{ include "woocommerce.fullname" . }}-wp-pvc
+{{- end }}

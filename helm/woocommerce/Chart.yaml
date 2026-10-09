@@ -1,0 +1,15 @@
+apiVersion: v2
+name: woocommerce
+description: Production-grade Helm chart for WordPress & WooCommerce with MySQL, PVCs, Ingress, and Health Probes.
+type: application
+version: 1.0.0
+appVersion: "6.5.0-wc8.8"
+maintainers:
+  - name: Urumi AI Platform
+    email: dev@urumi.ai
+keywords:
+  - wordpress
+  - woocommerce
+  - ecommerce
+  - mysql
+  - kubernetes
