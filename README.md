@@ -1,5 +1,8 @@
 # Urumi AI - FDE Internship Project Architecture
 
+[![Urumi AI CI Pipeline](https://github.com/rayinaaa/-urumi-ai-fde-assignment/actions/workflows/ci.yml/badge.svg)](https://github.com/rayinaaa/-urumi-ai-fde-assignment/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/badge/Release-v1.0.0-blue.svg)](https://github.com/rayinaaa/-urumi-ai-fde-assignment/releases/tag/v1.0.0)
+
 An enterprise-ready AI Forward Deployed Engineering (FDE) platform integrating conversational agents with e-commerce operations (WooCommerce) via the Model Context Protocol (MCP).
 
 ---

@@ -1,5 +1,8 @@
 # Urumi AI - FDE Internship Assignment Submission
 
+[![Urumi AI CI Pipeline](https://github.com/rayinaaa/-urumi-ai-fde-assignment/actions/workflows/ci.yml/badge.svg)](https://github.com/rayinaaa/-urumi-ai-fde-assignment/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/badge/Release-v1.0.0-blue.svg)](https://github.com/rayinaaa/-urumi-ai-fde-assignment/releases/tag/v1.0.0)
+
 This repository contains the complete implementation for the **Urumi AI Forward Deployed Engineering (FDE) Internship Assignment**.
 
 ---
