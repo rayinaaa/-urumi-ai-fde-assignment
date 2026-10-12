@@ -54,19 +54,19 @@ Urumi/
 │           ├── config.py              # WooCommerce credentials config
 │           └── client/
 │               └── woo_client.py      # Async WooCommerce REST API client
-└── helm/
-    └── urumi-platform/                # Kubernetes Helm Charts
-        ├── Chart.yaml
-        ├── values.yaml
-        └── templates/
-            ├── _helpers.tpl
-            ├── gateway-deployment.yaml
-            ├── gateway-service.yaml
-            ├── mcp-woocommerce-deployment.yaml
-            ├── mcp-woocommerce-service.yaml
-            ├── dashboard-deployment.yaml
-            ├── dashboard-service.yaml
-            └── ingress.yaml
+├── helm/
+│   ├── urumi-platform/                # Platform Helm Charts (Gateway, Dashboard, MCP Server)
+│   │   ├── Chart.yaml
+│   │   ├── values.yaml
+│   │   └── templates/
+│   └── woocommerce/                   # WooCommerce Helm Stack (WordPress 6.5, MySQL 8.0, PVCs)
+│       ├── Chart.yaml
+│       ├── values-local.yaml
+│       ├── values-prod.yaml
+│       └── templates/
+└── tests/                             # Automated Async Pytest Suite
+    ├── test_gateway.py
+    └── test_mcp_server.py
 ```
 
 ---
@@ -91,3 +91,5 @@ helm install urumi-platform ./helm/urumi-platform -f ./helm/urumi-platform/value
 ## 📖 Documentation Links
 - [System Architecture Specification](file:///c:/Users/rayin/OneDrive/Desktop/Urumi/docs/ARCHITECTURE.md)
 - [Model Context Protocol (MCP) Specification](file:///c:/Users/rayin/OneDrive/Desktop/Urumi/docs/MCP_SPECIFICATION.md)
+- [WooCommerce Kubernetes Deployment Guide](file:///c:/Users/rayin/OneDrive/Desktop/Urumi/docs/WOOCOMMERCE_K8S_DEPLOYMENT.md)
+

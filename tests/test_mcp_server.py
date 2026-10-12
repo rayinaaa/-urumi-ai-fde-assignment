@@ -2,8 +2,8 @@ import pytest
 import json
 from unittest.mock import AsyncMock, patch
 
-from server.client.woo_client import WooCommerceClient, WooCommerceAPIException
-from server.server import list_products, create_product, list_orders, get_order, update_order_status
+from server.client.woo_client import WooCommerceAPIException
+import server.server as srv
 
 @pytest.mark.asyncio
 async def test_list_products_tool():
@@ -22,8 +22,8 @@ async def test_list_products_tool():
             "permalink": "http://store.local/test-chair"
         }
     ]
-    with patch.object(WooCommerceClient, "list_products", new=AsyncMock(return_value=mock_products)):
-        res_json = await list_products(search="chair")
+    with patch.object(srv.woo_client, "list_products", new=AsyncMock(return_value=mock_products)):
+        res_json = await srv.list_products(search="chair")
         res = json.loads(res_json)
         assert res["count"] == 1
         assert res["products"][0]["name"] == "Test Chair"
@@ -39,8 +39,8 @@ async def test_create_product_tool():
         "status": "publish",
         "permalink": "http://store.local/new-desk"
     }
-    with patch.object(WooCommerceClient, "create_product", new=AsyncMock(return_value=mock_created)):
-        res_json = await create_product(name="New Desk", regular_price="299.00", sku="DESK-01")
+    with patch.object(srv.woo_client, "create_product", new=AsyncMock(return_value=mock_created)):
+        res_json = await srv.create_product(name="New Desk", regular_price="299.00", sku="DESK-01")
         res = json.loads(res_json)
         assert res["success"] is True
         assert res["product"]["id"] == 105
@@ -61,8 +61,8 @@ async def test_list_orders_tool():
             "line_items": [{"name": "Test Chair", "quantity": 1}]
         }
     ]
-    with patch.object(WooCommerceClient, "list_orders", new=AsyncMock(return_value=mock_orders)):
-        res_json = await list_orders()
+    with patch.object(srv.woo_client, "list_orders", new=AsyncMock(return_value=mock_orders)):
+        res_json = await srv.list_orders()
         res = json.loads(res_json)
         assert res["count"] == 1
         assert res["orders"][0]["id"] == 501
@@ -87,8 +87,8 @@ async def test_get_order_tool():
         "line_items": [{"id": 1, "name": "Test Chair", "product_id": 101, "quantity": 1, "price": 199.99}],
         "customer_note": ""
     }
-    with patch.object(WooCommerceClient, "get_order", new=AsyncMock(return_value=mock_order)):
-        res_json = await get_order(order_id=501)
+    with patch.object(srv.woo_client, "get_order", new=AsyncMock(return_value=mock_order)):
+        res_json = await srv.get_order(order_id=501)
         res = json.loads(res_json)
         assert res["id"] == 501
         assert res["total"] == "199.99"
@@ -100,8 +100,8 @@ async def test_update_order_status_tool():
         "status": "completed",
         "date_modified": "2026-10-08T18:30:00"
     }
-    with patch.object(WooCommerceClient, "update_order_status", new=AsyncMock(return_value=mock_updated)):
-        res_json = await update_order_status(order_id=501, status="completed")
+    with patch.object(srv.woo_client, "update_order_status", new=AsyncMock(return_value=mock_updated)):
+        res_json = await srv.update_order_status(order_id=501, status="completed")
         res = json.loads(res_json)
         assert res["success"] is True
         assert res["order"]["status"] == "completed"
